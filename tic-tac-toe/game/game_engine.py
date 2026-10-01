@@ -25,6 +25,7 @@ class GameEngine:
     def __init__(self):
         self.board = [[None] * 3 for _ in range(3)]
         self.current_player = 'X'
+        self.starting_player = 'X'
         self.round_over = False
         self.winner = None   # 'X', 'O', or None (meaning draw, only valid when round_over)
         self.x_wins = 0
@@ -58,19 +59,30 @@ class GameEngine:
         self.board[row][col] = self.current_player
         self.check_round_end()
         self.current_player = 'O' if self.current_player == 'X' else 'X'
-
+    def reset_round(self, starting_player=None):
+                    if starting_player is not None:
+                        self.starting_player = starting_player
+    
+                    self.board = [[None] * 3 for _ in range(3)]
+                    self.current_player = self.starting_player
+                    self.round_over = False
+                    self.winner = None
+    
+                    self._maybe_take_computer_turn()
     def handle_keydown(self, key):
         import pygame
         if key == pygame.K_r:
-            x_wins = self.x_wins
-            o_wins = self.o_wins
-            draws = self.draws
-
-            self.__init__()
-
-            self.x_wins = x_wins
-            self.o_wins = o_wins
-            self.draws = draws
+            self.reset_round()
+        elif key == pygame.K_m:
+            self.x_wins = 0
+            self.o_wins = 0
+            self.draws = 0
+            self.reset_round()
+        elif key == pygame.K_x:
+            self.reset_round('X')
+        elif key == pygame.K_o:
+            self.reset_round('O')
+            
 
     def check_round_end(self):
         winner = check_winner(self.board)
