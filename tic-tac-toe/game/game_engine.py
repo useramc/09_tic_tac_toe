@@ -27,6 +27,9 @@ class GameEngine:
         self.current_player = 'X'
         self.round_over = False
         self.winner = None   # 'X', 'O', or None (meaning draw, only valid when round_over)
+        self.x_wins = 0
+        self.o_wins = 0
+        self.draws = 0
 
     def handle_click(self, pos):
         if self.round_over:
@@ -56,7 +59,15 @@ class GameEngine:
     def handle_keydown(self, key):
         import pygame
         if key == pygame.K_r:
+            x_wins = self.x_wins
+            o_wins = self.o_wins
+            draws = self.draws
+
             self.__init__()
+
+            self.x_wins = x_wins
+            self.o_wins = o_wins
+            self.draws = draws
 
     def check_round_end(self):
         winner = check_winner(self.board)
@@ -64,17 +75,27 @@ class GameEngine:
         if winner:
             self.round_over = True
             self.winner = winner
+            if winner == 'X':
+                self.x_wins += 1
+            elif winner == 'O':
+                self.o_wins += 1
             return
 
         if is_board_full(self.board):
             self.round_over = True
             self.winner = None
+            self.draws += 1
 
     def draw(self, surface, font):
         from game import renderer
         renderer.draw_board(surface, self.board)
         turn_label = "Your turn (X)" if self.current_player == HUMAN_SYMBOL else "Computer's turn (O)"
-        renderer.draw_text(surface, font, turn_label, (10, 20))
+        renderer.draw_text(
+            surface,
+            font,
+            f"X: {self.x_wins}    O: {self.o_wins}    Draws: {self.draws}",
+            (200, 55)
+        )       
 
         if self.round_over:
             text = f"{self.winner} wins!" if self.winner else "Draw!"
